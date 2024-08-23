@@ -142,6 +142,7 @@ def export_report(
         )
         sw.plot_unit_summary(sorting_analyzer, unit_id, figure=fig)
         fig.suptitle(f"unit {unit_id}")
+        fig.tight_layout()
         fig.savefig(units_folder / f"{unit_id}.{format}")
         if not show_figures:
             plt.close(fig)

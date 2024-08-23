@@ -11,6 +11,7 @@ from .unit_waveforms import UnitWaveformsWidget
 from .unit_waveforms_density_map import UnitWaveformDensityMapWidget
 from .autocorrelograms import AutoCorrelogramsWidget
 from .amplitudes import AmplitudesWidget
+from .isi_distribution import ISIDistributionWidget
 
 
 class UnitSummaryWidget(BaseWidget):
@@ -85,8 +86,10 @@ class UnitSummaryWidget(BaseWidget):
         ncols = 3
         if sorting_analyzer.has_extension("correlograms") or sorting_analyzer.has_extension("spike_amplitudes"):
             ncols += 1
+        if sorting_analyzer.has_extension("isi_histogram"):
+            ncols += 1
         if sorting_analyzer.has_extension("spike_amplitudes"):
-            nrows += 1
+            nrows += 2
         gs = fig.add_gridspec(nrows, ncols)
 
         if sorting_analyzer.has_extension("unit_locations"):
@@ -109,6 +112,7 @@ class UnitSummaryWidget(BaseWidget):
             ax1.set_xticks([])
             ax1.set_xlabel(None)
             ax1.set_ylabel(None)
+            ax1.set_title("unit locations")
 
         ax2 = fig.add_subplot(gs[:2, 1])
         w = UnitWaveformsWidget(
@@ -123,7 +127,7 @@ class UnitSummaryWidget(BaseWidget):
             ax=ax2,
         )
 
-        ax2.set_title(None)
+        ax2.set_title("unit waveforms")
 
         ax3 = fig.add_subplot(gs[:2, 2])
         UnitWaveformDensityMapWidget(
@@ -136,6 +140,7 @@ class UnitSummaryWidget(BaseWidget):
             ax=ax3,
         )
         ax3.set_ylabel(None)
+        ax3.set_title("unit waveform density")
 
         if sorting_analyzer.has_extension("correlograms"):
             ax4 = fig.add_subplot(gs[:2, 3])
@@ -147,13 +152,25 @@ class UnitSummaryWidget(BaseWidget):
                 ax=ax4,
             )
 
-            ax4.set_title(None)
+            ax4.set_title("correlogram")
             ax4.set_yticks([])
 
+        if sorting_analyzer.has_extension("isi_histogram"):
+            ax7 = fig.add_subplot(gs[:2, -1])
+            ISIDistributionWidget(
+                sorting_analyzer,
+                unit_ids=[unit_id],
+                unit_colors=unit_colors,
+                backend="matplotlib",
+                ax=ax7
+            )
+            ax7.set_title("ISI histogram")
+
         if sorting_analyzer.has_extension("spike_amplitudes"):
-            ax5 = fig.add_subplot(gs[2, :3])
-            ax6 = fig.add_subplot(gs[2, 3])
-            axes = np.array([ax5, ax6])
+            ax5 = fig.add_subplot(gs[2, :-1])
+            ax6 = fig.add_subplot(gs[2, -1])
+            ax8 = fig.add_subplot(gs[3, :-1])
+            axes = np.array([ax5, ax6, ax8])
             AmplitudesWidget(
                 sorting_analyzer,
                 unit_ids=[unit_id],
@@ -163,5 +180,6 @@ class UnitSummaryWidget(BaseWidget):
                 backend="matplotlib",
                 axes=axes,
             )
+            ax5.set_title("spike amplitudes")
 
         fig.suptitle(f"unit_id: {dp.unit_id}")

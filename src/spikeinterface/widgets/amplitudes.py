@@ -45,7 +45,8 @@ class AmplitudesWidget(BaseWidget):
         max_spikes_per_unit=None,
         hide_unit_selector=False,
         plot_histograms=False,
-        bins=None,
+        xbins=None,
+        ybins=None,
         plot_legend=True,
         backend=None,
         **backend_kwargs,
@@ -97,8 +98,10 @@ class AmplitudesWidget(BaseWidget):
             spiketrains_to_plot = all_spiketrains
             amplitudes_to_plot = all_amplitudes
 
-        if plot_histograms and bins is None:
-            bins = 100
+        if plot_histograms and ybins is None:
+            ybins = 100
+        if plot_histograms and xbins is None:
+            xbins = 1000
 
         plot_data = dict(
             sorting_analyzer=sorting_analyzer,
@@ -108,7 +111,8 @@ class AmplitudesWidget(BaseWidget):
             spiketrains=spiketrains_to_plot,
             total_duration=total_duration,
             plot_histograms=plot_histograms,
-            bins=bins,
+            xbins=xbins,
+            ybins=ybins,
             hide_unit_selector=hide_unit_selector,
             plot_legend=plot_legend,
         )
@@ -124,7 +128,7 @@ class AmplitudesWidget(BaseWidget):
         if backend_kwargs["axes"] is not None:
             axes = backend_kwargs["axes"]
             if dp.plot_histograms:
-                assert np.asarray(axes).size == 2
+                assert np.asarray(axes).size == 3
             else:
                 assert np.asarray(axes).size == 1
         elif backend_kwargs["ax"] is not None:
@@ -146,21 +150,34 @@ class AmplitudesWidget(BaseWidget):
             scatter_ax.scatter(spiketrains, amps, color=dp.unit_colors[unit_id], s=3, alpha=1, label=unit_id)
 
             if dp.plot_histograms:
-                if dp.bins is None:
-                    bins = int(len(spiketrains) / 30)
+                if dp.ybins is None:
+                    ybins = int(len(spiketrains) / 30)
                 else:
-                    bins = dp.bins
+                    ybins = dp.ybins
                 ax_hist = self.axes.flatten()[1]
                 # this is super slow, using plot and np.histogram is really much faster (and nicer!)
                 # ax_hist.hist(amps, bins=bins, orientation="horizontal", color=dp.unit_colors[unit_id], alpha=0.8)
-                count, bins = np.histogram(amps, bins=bins)
+                count, bins = np.histogram(amps, bins=ybins)
                 ax_hist.plot(count, bins[:-1], color=dp.unit_colors[unit_id], alpha=0.8)
+
+                if dp.xbins is None:
+                    xbins = int(len(amps) / 30)
+                else:
+                    xbins = dp.xbins
+                ax_hist = self.axes.flatten()[2]
+                # this is super slow, using plot and np.histogram is really much faster (and nicer!)
+                # ax_hist.hist(amps, bins=bins, orientation="horizontal", color=dp.unit_colors[unit_id], alpha=0.8)
+                count, bins = np.histogram(spiketrains, bins=xbins)
+                ax_hist.plot(bins[:-1], count, color=dp.unit_colors[unit_id], alpha=0.8)
 
         if dp.plot_histograms:
             ax_hist = self.axes.flatten()[1]
             ax_hist.set_ylim(scatter_ax.get_ylim())
             ax_hist.axis("off")
             # self.figure.tight_layout()
+            ax_hist = self.axes.flatten()[2]
+            ax_hist.set_xlim(scatter_ax.get_xlim())
+            ax_hist.axis("off")
 
         if dp.plot_legend:
             if hasattr(self, "legend") and self.legend is not None:
