@@ -158,7 +158,7 @@ class UnitSummaryWidget(BaseWidget):
         if sorting_analyzer.has_extension("isi_histograms"):
             ax7 = fig.add_subplot(gs[:2, -1])
             ISIDistributionWidget(
-                sorting_analyzer,
+                sorting_analyzer.sorting,
                 unit_ids=[unit_id],
                 backend="matplotlib",
                 ax=ax7
