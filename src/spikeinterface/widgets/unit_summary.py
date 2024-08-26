@@ -86,7 +86,7 @@ class UnitSummaryWidget(BaseWidget):
         ncols = 3
         if sorting_analyzer.has_extension("correlograms") or sorting_analyzer.has_extension("spike_amplitudes"):
             ncols += 1
-        if sorting_analyzer.has_extension("isi_histogram"):
+        if sorting_analyzer.has_extension("isi_histograms"):
             ncols += 1
         if sorting_analyzer.has_extension("spike_amplitudes"):
             nrows += 2
@@ -155,12 +155,11 @@ class UnitSummaryWidget(BaseWidget):
             ax4.set_title("correlogram")
             ax4.set_yticks([])
 
-        if sorting_analyzer.has_extension("isi_histogram"):
+        if sorting_analyzer.has_extension("isi_histograms"):
             ax7 = fig.add_subplot(gs[:2, -1])
             ISIDistributionWidget(
                 sorting_analyzer,
                 unit_ids=[unit_id],
-                unit_colors=unit_colors,
                 backend="matplotlib",
                 ax=ax7
             )
